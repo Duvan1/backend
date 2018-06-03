@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Helpers\JwtAuth;
 use App\Producto;
+use Illuminate\Support\Facades\DB;
 
 class ProductoController extends Controller
 {
@@ -31,11 +32,20 @@ class ProductoController extends Controller
 
 
     public function show($id){
-        $producto = Producto::find($id)->load('user');
-        return response()->json(array(
-        	'producto'=> $producto, 
-        	'status'=> 'success'
-        	), 200);
+        $producto = Producto::find($id);
+        if(is_object($producto)){
+
+            $producto = Producto::find($id)->load('user');  
+            return response()->json(array(
+            'producto'=> $producto, 
+            'status'=> 'success'
+            ), 200);
+        }else{
+             return response()->json(array(
+            'message'=> 'no esta melo', 
+            'status'=> 'error'
+            ), 400);
+        }
     }
 
 
@@ -53,7 +63,6 @@ class ProductoController extends Controller
             $user = $jwtAuth->checkToken($hash, true);
             
             $validate = \Validator::make($params_array, [
-                'codigo' => 'required',
                 'nombre' => 'required',
                 'description'=> 'required',
                 'cantidad' => 'required',
@@ -66,7 +75,6 @@ class ProductoController extends Controller
             //Guarda objeto
             $producto = new Producto();
             $producto->Empleado_cedula = $params->Empleado_cedula;
-            $producto->codigo = $params->codigo;
             $producto->nombre = $params->nombre;
             $producto->description = $params->description;
             $producto->cantidad = $params->cantidad;
@@ -107,7 +115,6 @@ class ProductoController extends Controller
             $params_array = json_decode($json, true);
             
             $validate = \Validator::make($params_array, [
-                'codigo' => 'required',
                 'nombre' => 'required',
                 'description'=> 'required',
                 'cantidad' => 'required',
@@ -118,6 +125,13 @@ class ProductoController extends Controller
                 return response()->json($validate->errors(), 400);
             }
             //Actualizar registro
+          
+            unset($params_array['Empleado_cedula']);
+            unset($params_array['id']);
+            unset($params_array['descuento_paquete']);
+            unset($params_array['codigo']);
+            unset($params_array['user']);
+            unset($params_array['created_at']);
             $producto = Producto::where('id', $id)->update($params_array);
             $data = array(
                 'producto' => $params,
@@ -161,18 +175,42 @@ class ProductoController extends Controller
         return response()->json($data, 200);
     }
 
-    public function tuHermana()
+    public function topTen()
     {
-    	$perro_mestizo = new Producto();
-    	$coso = $perro_mestizo->consulPrue();
-    	//dd($coso);
-    	$data=array(
-            'producto'=>$coso,
+        //Producto menos vendido
+        $results = DB::table('ventas')
+        ->join('detalles_venta', 'detalles_venta.venta_id', '=', 'ventas.id')
+        ->join('productos', 'productos.id', '=', 'detalles_venta.producto_id')
+        //->whereBetween('ventas.fecha', ['2018-05-19', '2018-05-19'])
+        ->select('productos.nombre','detalles_venta.total')
+        ->ORDERBY('detalles_venta.total', 'asc') 
+        ->limit(10)
+        ->get();
+        $data=array(
+            'productos'=>$results,
             'status'=>'success',
             'code' => 200
         );
-    	return response()->json($data, 200);
+        return response()->json($data, 200);
+    }
 
+    public function topTenRangoFechas()
+    {
+        //Producto menos vendido
+        $results = DB::table('ventas')
+        ->join('detalles_venta', 'detalles_venta.venta_id', '=', 'ventas.id')
+        ->join('productos', 'productos.id', '=', 'detalles_venta.producto_id')
+        ->whereBetween('ventas.fecha', ['2018-05-19', '2018-05-19'])
+        ->select('productos.nombre','detalles_venta.total')
+        ->ORDERBY('detalles_venta.total', 'asc') 
+        ->limit(1)
+        ->get();
+        $data=array(
+            'productos'=>$results,
+            'status'=>'success',
+            'code' => 200
+        );
+        return response()->json($data, 200);
     }
 
 }

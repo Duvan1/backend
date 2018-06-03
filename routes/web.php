@@ -17,12 +17,19 @@ Route::get('/', function () {
 Route::group(['prefix'=> 'api', 'middleware' => 'cors'], function (){
 	Route::post('login', 'UserController@login');
 	Route::post('register', 'UserController@register');
+	Route::resource('products', 'ProductoController');
+	Route::resource('detalles', 'Detalles_ventaController');
+	Route::resource('cliente', 'ClienteController');
+	Route::resource('venta', 'VentaController');
+	Route::get('mas-vendido', 'ProductoController@topTen');
+	/*
 //Route::post('login', 'UserController@login');
-Route::resource('products', 'ProductoController');
+Route::post('products', 'ProductoController@store');
 //Route::get('products/tuhermana', 'ProductoController@tuHermana');
 Route::resource('venta', 'VentaController');
 Route::resource('empleado', 'EmpleadoController');
-Route::resource('cliente', 'ClienteController');
+Route::resource('cliente', 'ClienteController');*/
 });
+
 
 

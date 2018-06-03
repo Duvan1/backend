@@ -16,7 +16,11 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        //
+        $cliente = Cliente::all();
+        return response()->json(array(
+        'cliente'=> $cliente,
+        'status'=>'success'
+        ), 200);
     }
 
     /**
@@ -26,11 +30,7 @@ class ClienteController extends Controller
      */
     public function create()
     {
-        $cliente = Empleado::all();
-        return response()->json(array(
-        'cliente'=> $cliente,
-        'status'=>'success'
-        ), 200);
+        
     }
 
     /**
@@ -101,10 +101,18 @@ class ClienteController extends Controller
     public function show($id)
     {
         $cliente = Cliente::where('cedula', $id)->first();//->load('user');
-        return response()->json(array(
+        if ($cliente == null) {
+            return response()->json(array(
+            'message'=> "no encontrado" , 
+            'status'=> 'error'
+            ), 400);
+        }else{
+            return response()->json(array(
             'cliente'=> $cliente, 
             'status'=> 'success'
             ), 200);
+        }
+        
     }
 
     /**
