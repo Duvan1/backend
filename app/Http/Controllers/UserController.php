@@ -42,6 +42,7 @@ class UserController extends Controller
 	    			$user->save();
 
 	    			$data = array(
+                    'user' => $user,
 	    			'status' => 'melo',
 	    			'code' => 200,
 	    			'message' => 'Usuario creado'
@@ -51,7 +52,7 @@ class UserController extends Controller
 	    		$data = array(
 	    			'status' => 'error',
 	    			'code' => 400,
-	    			'message' => 'Usuario no creado'
+	    			'message' => 'Usuario ya existe'
     			);
     		}
 
@@ -92,7 +93,23 @@ class UserController extends Controller
                 );
         }
         return response()->json($signup, 200);
-    }      
+    }     
+
+    public function UserName($username)
+    {
+        $usersirijillo = User::where('username', '=', $username)->first();
+        if(is_object($usersirijillo)){  
+            return response()->json(array(
+            'message'=> 'El usuario ya existe', 
+            'status'=> 'success'
+            ), 200);
+        }else{
+             return response()->json(array(
+            'message'=> 'El usuario no existe', 
+            'status'=> 'error'
+            ), 400);
+        }
+    } 
 
     
 }

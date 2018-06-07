@@ -17,9 +17,11 @@ Route::get('/', function () {
 Route::group(['prefix'=> 'api', 'middleware' => 'cors'], function (){
 	Route::post('login', 'UserController@login');
 	Route::post('register', 'UserController@register');
+	Route::get('username/{username}', 'UserController@UserName');
 	Route::resource('products', 'ProductoController');
 	Route::resource('detalles', 'Detalles_ventaController');
 	Route::resource('cliente', 'ClienteController');
+	Route::resource('empleado', 'EmpleadoController');
 	Route::resource('venta', 'VentaController');
 	Route::get('mas-vendido', 'ProductoController@topTen');
 	/*
