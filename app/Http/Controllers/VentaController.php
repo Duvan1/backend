@@ -149,6 +149,23 @@ class VentaController extends Controller
         return response()->json($data, 200);
     }
 
+    public function detallesDeLaVenta($id_venta)
+    {
+        $results = DB::table('ventas')
+        ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+        ->select('detalles_venta.id')
+        ->where(DB::raw('detalles_venta.venta_id'), '=', $id_venta)
+        ->groupBy('detalles_venta.id')
+        ->get();
+
+        $data=array(
+            'detalles'=>$results,
+            'status'=>'success',
+            'code' => 200
+        );
+        return response()->json($data, 200);
+    }
+
     /*public function EmpleadosMasVenden()
     {
 
