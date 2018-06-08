@@ -12,7 +12,7 @@ class Producto extends Model
         return $this->belongsTo('App\User', 'cedula');
     }
 
-    public function consulPrue()
+    /*public function consulPrue()
     {
     	
     	return DB::table('ventas')
@@ -24,5 +24,5 @@ ORDER BY total
 DESC limit 3')
 			        ->get();
     	
-    }
+    }*/
 }

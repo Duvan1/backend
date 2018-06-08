@@ -24,6 +24,8 @@ Route::group(['prefix'=> 'api', 'middleware' => 'cors'], function (){
 	Route::resource('empleado', 'EmpleadoController');
 	Route::resource('venta', 'VentaController');
 	Route::get('mas-vendido', 'ProductoController@topTen');
+	Route::get('mas-vendido-fechas/{f1}/{f2}/{orden}', 'ProductoController@topTenRangoFechas');
+	Route::get('ganancias/{tipo}/{value}', 'VentaController@ganancias');
 	/*
 //Route::post('login', 'UserController@login');
 Route::post('products', 'ProductoController@store');

@@ -176,16 +176,17 @@ class ProductoController extends Controller
     }
 
     public function topTen()
-    {
+    {        
         //Producto menos vendido
         $results = DB::table('ventas')
-        ->join('detalles_venta', 'detalles_venta.venta_id', '=', 'ventas.id')
-        ->join('productos', 'productos.id', '=', 'detalles_venta.producto_id')
-        //->whereBetween('ventas.fecha', ['2018-05-19', '2018-05-19'])
-        ->select('productos.nombre','detalles_venta.total')
-        ->ORDERBY('detalles_venta.total', 'asc') 
-        ->limit(10)
-        ->get();
+            ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+            ->join('productos', 'productos.id', '=', 'detalles_venta.producto_id')
+            ->select('productos.nombre', DB::raw('SUM(detalles_venta.total) as total_sales'), DB::raw('SUM(detalles_venta.cantidad) as cant_sales'),DB::raw('max(ventas.fecha) as fecha'))
+            ->groupBy('productos.nombre')
+            ->orderBy('total_sales', 'desc')
+            ->get();
+
+
         $data=array(
             'productos'=>$results,
             'status'=>'success',
@@ -193,18 +194,34 @@ class ProductoController extends Controller
         );
         return response()->json($data, 200);
     }
+    
 
-    public function topTenRangoFechas()
+    public function topTenRangoFechas($f1, $f2,$orden)
     {
         //Producto menos vendido
+        $limit;
+        if ($orden=='asc') {
+            //menos vendido
+            $limit = 1;
+            # code...
+        }else if ($orden=='desc') {
+            //top 10 mas vendidos
+            $limit = 10;
+        }
         $results = DB::table('ventas')
-        ->join('detalles_venta', 'detalles_venta.venta_id', '=', 'ventas.id')
+        ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
         ->join('productos', 'productos.id', '=', 'detalles_venta.producto_id')
-        ->whereBetween('ventas.fecha', ['2018-05-19', '2018-05-19'])
-        ->select('productos.nombre','detalles_venta.total')
-        ->ORDERBY('detalles_venta.total', 'asc') 
-        ->limit(1)
+        ->select('productos.nombre', 
+            DB::raw('SUM(detalles_venta.total) as total_sales'), 
+            DB::raw('SUM(detalles_venta.cantidad) as cant_sales'),
+            DB::raw('max(ventas.fecha) as fecha'))
+        ->groupBy('productos.nombre')
+        ->whereBetween('ventas.fecha', [$f1, $f2])
+        ->orderBy('total_sales', $orden)
+        ->limit($limit)
         ->get();
+
+
         $data=array(
             'productos'=>$results,
             'status'=>'success',

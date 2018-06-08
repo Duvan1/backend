@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Helpers\JwtAuth;
 use App\Venta;
+use Illuminate\Support\Facades\DB;
 
 class VentaController extends Controller
 {
@@ -113,5 +114,64 @@ class VentaController extends Controller
         }
         return response()->json($data, 200);
     }
+
+    public function ganancias($tipo, $value)
+    {
+        $results;
+        if ($tipo == 'day') {
+            $results = DB::table('ventas')
+            ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+            ->select(DB::raw('SUM(detalles_venta.total) as total_sales'))
+            //->where(DB::raw('month(ventas.fecha)'), '=', 5)
+            ->whereBetween('ventas.fecha', [$value, $value])
+            ->get();
+        }else if($tipo == 'month'){
+            $results = DB::table('ventas')
+            ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+            ->select(DB::raw('SUM(detalles_venta.total) as total_sales'))
+            ->where(DB::raw('month(ventas.fecha)'), '=', $value)
+            //->whereBetween('ventas.fecha', ['2018-06-07', '2018-06-07'])
+            ->get();
+        }else if($tipo == 'year'){
+            $results = DB::table('ventas')
+            ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+            ->select(DB::raw('SUM(detalles_venta.total) as total_sales'))
+            ->where(DB::raw('year(ventas.fecha)'), '=', $value)
+            //->whereBetween('ventas.fecha', ['2018-06-07', '2018-06-07'])
+            ->get();
+        }
+
+        $data=array(
+            'ganancias'=>$results,
+            'status'=>'success',
+            'code' => 200
+        );
+        return response()->json($data, 200);
+    }
+
+    /*public function EmpleadosMasVenden()
+    {
+
+        $results = DB::table('ventas')
+        ->join('detalles_venta', 'detalles_venta.venta_id', '=', 'ventas.id')
+        ->select('ventas.id',
+                'ventas.clientes_cedula',
+                'ventas.Empleado_cedula',
+                'detalles_venta.producto_id')
+                DB::raw('SUM(detalles_venta.total) as totalsirijillo'),
+                DB::raw('SUM(detalles_venta.cantidad) as catidadsirijilla'))
+        ->where('ventas.id','=', 'detalles_venta.venta_id')
+        ->groupBy('ventas.Empleado_cedula')
+        ->orderBy(DB::raw('SUM(detalles_venta.total)'))
+        ->limit(10)
+        ->get();
+
+        $data=array(
+            'empleado'=>$results,
+            'status'=>'success',
+            'code' => 200
+        );
+        return response()->json($data, 200);
+    }*/
 
 }
