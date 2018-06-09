@@ -153,13 +153,24 @@ class VentaController extends Controller
     {
         $results = DB::table('ventas')
         ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
-        ->select('detalles_venta.id')
+        ->select('ventas.clientes_cedula','ventas.Empleado_cedula', 'ventas.fecha', 'ventas.tipo_pago', 'ventas.dias', 'detalles_venta.producto_id', 'detalles_venta.total', 'detalles_venta.cantidad')
         ->where(DB::raw('detalles_venta.venta_id'), '=', $id_venta)
-        ->groupBy('detalles_venta.id')
+        ->where(DB::raw('ventas.id'), '=', $id_venta)
+        ->groupBy('ventas.clientes_cedula','ventas.Empleado_cedula', 'ventas.fecha', 'ventas.tipo_pago', 'ventas.dias', 'detalles_venta.producto_id', 'detalles_venta.total', 'detalles_venta.cantidad')
+        //->limit(1)
+        ->get();
+
+        $results1 = DB::table('ventas')
+        ->join('detalles_venta', 'ventas.id', '=', 'detalles_venta.venta_id')
+        ->select('ventas.id',DB::raw('SUM(detalles_venta.total) as total_sales'), DB::raw('SUM(detalles_venta.cantidad) as cantidad_sales'))
+        ->where(DB::raw('detalles_venta.venta_id'), '=', $id_venta)
+        ->where(DB::raw('ventas.id'), '=', $id_venta)
+        ->groupBy('ventas.id')
         ->get();
 
         $data=array(
             'detalles'=>$results,
+            'totales'=>$results1,
             'status'=>'success',
             'code' => 200
         );
